@@ -1,0 +1,252 @@
+# Publishes the shared market-price snapshot every install downloads at launch.
+#
+# THIS FILE IS STAGED, NOT LIVE. It runs from the PUBLIC releases repo
+# (goldstargamingtv-droid/bdo-tracker-releases) at
+# .github/workflows/price-snapshot.yml. It is kept here so it lives in version
+# control next to the code it depends on. See README.md beside this file for
+# the copy-paste deployment steps and the two things to reconcile first.
+#
+# Why the public repo and not this one: its Actions minutes are free, and the
+# published asset has to be readable without a token.
+
+name: price-snapshot
+
+on:
+  schedule:
+    # Offset minute ON PURPOSE. GitHub queues scheduled runs platform-wide and
+    # :00 is by far the most contended slot, so runs there are routinely
+    # delayed. :37 is arbitrary and uncrowded.
+    #
+    # Hourly, because the cost is one run of ~17 arsha requests and the app
+    # treats a snapshot as authoritative until it is
+    # pricing.snapshot_max_age_hours old (72 h default, bdo_tracker/config.py).
+    # Hourly leaves 71 h of slack for missed runs while keeping published
+    # prices close to live.
+    - cron: "37 * * * *"
+
+  # Manual kick. Also the one-click restart if GitHub disables the schedule
+  # (see the 60-day section in README.md).
+  workflow_dispatch:
+    inputs:
+      region:
+        description: "arsha region to publish (must match pricing.region in the app)"
+        default: "na"
+        required: false
+
+# Minimal by construction: naming any permission drops every unnamed one to
+# none. `contents: write` is what `gh release create` / `gh release upload`
+# need on this repo, and it is the only thing this workflow does.
+permissions:
+  contents: write
+
+concurrency:
+  # One publisher at a time, repo-wide. `gh release upload --clobber` deletes
+  # the existing asset before uploading the replacement, so two overlapping
+  # runs can race that delete and leave the asset missing or half-written at
+  # the moment a client GETs it.
+  group: price-snapshot
+  # Queue, never cancel. Cancelling mid-upload IS the failure this guard
+  # exists to prevent.
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # The sweep is ~17 category requests plus per-item follow-ups, so a healthy
+    # run is minutes. This only stops a hung run from burning the budget.
+    timeout-minutes: 30
+
+    env:
+      # ── Names the app already hardcodes. Do not change either one alone. ──
+      #
+      # SNAPSHOT_TAG must match the tag inside PricingConfig.snapshot_url
+      # (bdo_tracker/config.py), which ships as:
+      #   .../releases/download/prices/price_snapshot_{region}.json.gz
+      # Every install that has not overridden that URL will 404 if the two
+      # drift apart. README.md section 1 covers this.
+      SNAPSHOT_TAG: prices
+      # Schedule runs supply no inputs, so `inputs.region` is null there.
+      REGION: ${{ inputs.region || 'na' }}
+      # Built-in token, scoped to this repo by the permissions block above.
+      # No PAT: the asset and the release both live in the repo running this.
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # `python tools/foo.py` puts tools/ on sys.path, not the repo root, so
+      # `import bdo_tracker` needs this.
+      PYTHONPATH: ${{ github.workspace }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        # httpx only. bdo_tracker/config.py and pricing/{market,snapshot}.py
+        # import nothing outside the stdlib at module level (verified
+        # 2026-08-16), and httpx is imported lazily inside the fetchers.
+        run: pip install httpx
+
+      - name: Resolve names
+        run: |
+          set -euo pipefail
+          # Must equal snapshot.snapshot_filename(region) + ".gz"
+          # (bdo_tracker/pricing/snapshot.py) or the configured URL will
+          # not resolve. Region is in the filename so switching regions does
+          # not leave two files fighting over one name.
+          echo "ASSET=price_snapshot_${REGION}.json.gz"            >> "$GITHUB_ENV"
+          echo "OUT=${GITHUB_WORKSPACE}/price_snapshot_${REGION}.json.gz" >> "$GITHUB_ENV"
+          echo "PREV_DIR=${GITHUB_WORKSPACE}/previous"             >> "$GITHUB_ENV"
+
+      - name: Download the published snapshot (merge input)
+        run: |
+          set -euo pipefail
+          mkdir -p "$PREV_DIR"
+          # Two very different failures look identical to `gh release
+          # download`: "the prices release does not exist yet" (fine, this is
+          # the first run) and "GitHub unreachable / token wrong" (NOT fine —
+          # building with no merge input silently drops every item this run's
+          # sweep happens to miss, which is exactly the rule-5 failure mode).
+          # So ask the API directly and branch on the 404. MEASURED
+          # 2026-08-16 against this repo: `gh api` on a missing tag prints
+          # "gh: Not Found (HTTP 404)" to stderr and exits non-zero.
+          if gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${SNAPSHOT_TAG}" \
+               --jq '.assets[].name' > assets.txt 2> api_err.txt; then
+            if grep -qx "$ASSET" assets.txt; then
+              gh release download "$SNAPSHOT_TAG" \
+                --repo "$GITHUB_REPOSITORY" \
+                --pattern "$ASSET" \
+                --dir "$PREV_DIR"
+              echo "PREV=${PREV_DIR}/${ASSET}" >> "$GITHUB_ENV"
+              echo "merge input: $(wc -c < "${PREV_DIR}/${ASSET}") bytes"
+            else
+              echo "::warning::release '${SNAPSHOT_TAG}' exists but carries no '${ASSET}' — building with no merge input"
+            fi
+          elif grep -q "HTTP 404" api_err.txt; then
+            echo "no '${SNAPSHOT_TAG}' release yet — first publish, building with no merge input"
+          else
+            # Anything else is a real failure and must not be papered over.
+            cat api_err.txt
+            exit 1
+          fi
+
+      - name: Build the snapshot
+        run: |
+          set -euo pipefail
+          # tools/build_price_snapshot.py is the ONE writer of these bytes
+          # (snapshot.py invariant 1: producer and consumer must never disagree
+          # about the format, so the builder emits through build()/encode()).
+          # It sweeps arsha, carries --previous forward for anything the sweep
+          # missed, and exits non-zero when its own sanity gate refuses the
+          # result. `set -e` turns that into a failed job — which is the point:
+          # a refused snapshot must never reach the release.
+          #
+          # CONTRACT SURFACE. If the builder's flags differ, this is the only
+          # step to edit — see README.md section 2.
+          args=(--region "$REGION" --out "$OUT")
+          if [ -n "${PREV:-}" ]; then
+            args+=(--previous "$PREV")
+          fi
+          # --ids is NOT optional here. The builder unions its target set from
+          # --db / --ids / --previous, and this runner has no tracker.sqlite.
+          # MEASURED 2026-08-16 (seam check): invoking it with only
+          # --region/--out exits 2 with "no item ids to price". On a first
+          # publish there is no --previous either, so the job fails, no release
+          # is created, and the NEXT run also has no --previous — the pipeline
+          # could never bootstrap. The id file is written by
+          # tools/export_price_item_ids.py and copied in per README section 3.
+          if [ -f tools/price_item_ids.json ]; then
+            args+=(--ids tools/price_item_ids.json)
+          elif [ -z "${PREV:-}" ]; then
+            echo "::error::tools/price_item_ids.json is missing and there is no published snapshot to merge from — the builder has no item ids and will exit 2. Copy the id file into this repo (README section 3)."
+            exit 1
+          else
+            # Survivable: --previous carries every id the last publish knew, so
+            # coverage holds. But new items added by an app release will never
+            # enter the set until the id file is refreshed — say so out loud.
+            echo "::warning::tools/price_item_ids.json is missing — coverage is frozen at whatever the previous publish carried plus the category sweep"
+          fi
+          python tools/build_price_snapshot.py "${args[@]}"
+          test -s "$OUT"
+
+      - name: Verify the exact bytes a client would download
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          import pathlib
+
+          from bdo_tracker.pricing import snapshot
+
+          out = pathlib.Path(os.environ["OUT"])
+          region = os.environ["REGION"]
+          data = out.read_bytes()
+
+          # Parse with the SAME function every install runs. Not a second gate
+          # — proof that the file about to be published is readable by the
+          # consumer, caught here instead of on a tester's machine.
+          snap = snapshot.parse(data)
+
+          # Collapse yardstick. check() normally measures a publish against the
+          # client's local `prices` row count; the publisher's equivalent is
+          # the count we are about to replace. This is what refuses a run that
+          # lost its merge input and swept only a fraction of the market —
+          # such a run clears the absolute floor of 50 easily but would still
+          # be a large regression for everyone who applies it.
+          prev = os.environ.get("PREV") or ""
+          baseline = 0
+          if prev:
+              baseline = snapshot.parse(pathlib.Path(prev).read_bytes()).count
+          # Raises SnapshotRejected -> traceback -> non-zero -> job fails.
+          snapshot.check(snap, region=region, baseline_count=baseline)
+
+          zero = sum(1 for e in snap.entries if e.price == 0 and not e.not_marketable)
+          lines = [
+              "| field | value |",
+              "| --- | --- |",
+              f"| region | `{snap.region}` |",
+              f"| generated_at | `{snap.generated_at.isoformat()}` |",
+              f"| items | {snap.count} |",
+              f"| previously published | {baseline or 'n/a (first publish)'} |",
+              f"| not marketable | {sum(1 for e in snap.entries if e.not_marketable)} |",
+              f"| gzipped size | {len(data):,} B |",
+              f"| source | `{snap.source}` |",
+          ]
+          if zero:
+              # snapshot.py invariant 6: a marketable item at price 0 is dropped
+              # by apply_snapshot into skipped_zero, so publishing it just
+              # wastes bytes. Surface it rather than let it pass unremarked.
+              lines.append(f"| **marketable rows priced 0 (wasted)** | {zero} |")
+              print(f"::warning::{zero} marketable entries carry price 0 — clients will skip them")
+
+          summary = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary:
+              with open(summary, "a", encoding="utf-8") as fh:
+                  fh.write("\n".join(lines) + "\n")
+          print("\n".join(lines))
+          PY
+
+      - name: Publish (clobber the asset on the fixed tag)
+        run: |
+          set -euo pipefail
+          if ! gh release view "$SNAPSHOT_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            # --prerelease keeps this release OUT of GitHub's "Latest"
+            # computation, which matters twice in THIS repo:
+            #   * tools/build_release.py next_version() reads the latest
+            #     release's tagName and calls latest.split(".") on it — a
+            #     "prices" tag landing there crashes the everyday publish.
+            #   * Velopack's GithubSource (bdo_tracker/ui/updater.py) and
+            #     `vpk download github` both skip prereleases by default, so
+            #     the in-app updater never sees a release carrying no update
+            #     feed.
+            # Asset download URLs work exactly the same on a prerelease.
+            gh release create "$SNAPSHOT_TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "Price snapshot (rolling)" \
+              --prerelease \
+              --notes "Rolling market-price snapshot for BDO Loot Tracker. The asset on this tag is replaced in place by the price-snapshot workflow; the tag never moves so the app's configured URL keeps resolving. Not an app release — see the newest normal release for the installer."
+          fi
+          gh release upload "$SNAPSHOT_TAG" "$OUT" \
+            --repo "$GITHUB_REPOSITORY" \
+            --clobber
+          echo "published: https://github.com/${GITHUB_REPOSITORY}/releases/download/${SNAPSHOT_TAG}/${ASSET}"
