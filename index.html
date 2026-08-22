@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Automatic loot tracking for Black Desert Online. Watches your drop log while you grind, prices every item at live market value, and turns each session into numbers worth sharing. Screen pixels only — never touches the game.">
+<meta name="description" content="Free loot tracker for Black Desert Online (BDO). Watches your drop log while you grind, prices every item at live market value, and turns each session into numbers worth sharing. Screen pixels only — never touches the game.">
 <meta property="og:title" content="BDO Loot Tracker — know your silver/hr">
 <meta property="og:description" content="Automatic loot tracking for Black Desert Online. Live silver/hr over the game, post-tax session reports, shareable Loot Cards. Screen pixels only.">
 <meta property="og:type" content="website">
@@ -11,8 +11,10 @@
 <meta property="og:image" content="https://bdoloottracker.com/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://bdoloottracker.com/">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "BDO Loot Tracker", "url": "https://bdoloottracker.com/", "image": "https://bdoloottracker.com/assets/og.png", "screenshot": "https://bdoloottracker.com/assets/og.png", "applicationCategory": "UtilitiesApplication", "applicationSubCategory": "Game companion / loot tracker", "operatingSystem": "Windows 10, Windows 11", "softwareVersion": "0.1.66", "releaseNotes": "https://github.com/goldstargamingtv-droid/bdo-tracker-releases/releases", "downloadUrl": "https://github.com/goldstargamingtv-droid/bdo-tracker-releases/releases/latest/download/BDOLootTracker-win-Setup.exe", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "description": "Free loot tracker for Black Desert Online. Watches your on-screen drop log while you grind, prices every item at live market value, and reports post-tax silver per hour, personal bests and shareable Loot Cards. Screen pixels only — never touches the game.", "about": {"@type": "VideoGame", "name": "Black Desert Online"}, "isAccessibleForFree": true}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is this safe to use with BDO's anti-cheat?", "acceptedAnswer": {"@type": "Answer", "text": "The tracker never interacts with the game: no memory reading, no injection, no DLLs, no packet capture — it only takes screenshots of your own desktop and reads the pixels, the same capture method streaming software uses. It cannot see or touch the game process, and there's nothing for anti-cheat to detect inside the game."}}, {"@type": "Question", "name": "Will it cost me FPS?", "acceptedAnswer": {"@type": "Answer", "text": "Capture uses lightweight desktop duplication, and every bit of recognition runs CPU-only while a session is live — the GPU stays fully on the game. It's built to track a 2-hour grind without you noticing it's there."}}, {"@type": "Question", "name": "What do I need for it to work?", "acceptedAnswer": {"@type": "Answer", "text": "Windows 10 or 11, the game in 1920×1080 borderless windowed, and the drop log visible on screen. A one-time calibration points the tracker at your drop-log position, then it's set-and-forget."}}, {"@type": "Question", "name": "What can it track?", "acceptedAnswer": {"@type": "Answer", "text": "Live grinding and hunting sessions (drop log + Get-All loot box reading), and cooking and alchemy sessions with full net-profit accounting. Alongside the live tracking there's a Materials planner for what you can craft from your storage, and a manual Enhancement ledger for what the RNG has cost you."}}, {"@type": "Question", "name": "How accurate is it?", "acceptedAnswer": {"@type": "Answer", "text": "It is checked against the game, not against itself: recognition is tuned on real sessions where the before/after inventory was counted by hand, and production runs are matched item by item against that count — a 193-bottle alchemy brew came out exact on every line. It is also honest about uncertainty: a read it is not sure of is flagged in honey-yellow instead of hidden, and any drop worth over 1M silver needs a confident read or a second sighting before it enters your totals, so one blurry frame can never invent a jackpot. Unpriced and unrecognised drops are counted and shown, never silently dropped."}}, {"@type": "Question", "name": "Something didn't count right — where do I report it?", "acceptedAnswer": {"@type": "Answer", "text": "The Discord. Say which spot and roughly when, and attach the file from Account → Export Diagnostics — it packs the frames around the miss into a ~10 MB zip with nothing else from your PC in it. That's usually enough to fix the read for that spot in the next release, for everyone."}}, {"@type": "Question", "name": "Is it free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes — free during the beta, and it stays free. It's a passion project built by a grinder who wanted real numbers; the only thing we ask is that you tell us when it's wrong."}}]}</script>
 <link rel="icon" href="assets/favicon.ico">
-<title>BDO Loot Tracker</title>
+<title>BDO Loot Tracker — Silver/hr &amp; Loot Tracking for Black Desert Online</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap">
@@ -341,7 +343,7 @@ svg.chart{display:block;width:100%}
 /* ---------- feature page ---------- */
 .feat{max-width:1000px}
 .feathero{border-radius:14px;padding:30px 32px;background:radial-gradient(110% 130% at 12% 0%,color-mix(in srgb,var(--mode) 16%,transparent),transparent 60%),linear-gradient(180deg,var(--card-top),var(--card-bot));border:1px solid var(--line);border-top-color:var(--line-lit)}
-.feathero h1{font-size:32px;font-weight:800;letter-spacing:-.03em;color:var(--txt-hi);line-height:1.12;text-wrap:balance}
+.feathero h1,.feathero .fh1{font-size:32px;font-weight:800;letter-spacing:-.03em;color:var(--txt-hi);line-height:1.12;text-wrap:balance}
 .feathero .lede{font-size:14.5px;color:var(--txt-lo);line-height:1.6;max-width:62ch;margin-top:11px}
 .feathero .eyebrow{font-size:10px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--mode);margin-bottom:10px}
 .featgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:13px}
@@ -581,6 +583,7 @@ h1.hh .money{background:linear-gradient(100deg,var(--silver) 15%,var(--silver-2)
 .betapill{display:inline-block;vertical-align:2px;margin-left:6px;font:800 9px var(--mono);letter-spacing:.12em;color:var(--blue);border:1px solid rgba(79,143,255,.45);border-radius:5px;padding:2px 5px}
 body.inapp .betabar{display:none}
 @media (max-width:620px){.bb-t{display:none}}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .herovid{position:relative;width:100%;max-width:640px}
 .herovid video{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--line-lit);background:var(--bg-1);box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px rgba(79,143,255,.12)}
 .hvcap{display:flex;align-items:center;gap:8px;margin-top:10px;font:500 11.5px var(--mono);color:var(--txt-dim);letter-spacing:.02em}
@@ -602,7 +605,7 @@ body.inapp .betabar{display:none}
 <div class="betabar" id="betabar"><div class="wrap betain"><span class="bb-pill">OPEN BETA</span><span class="bb-t">We're looking for testers. Grind with it, tell us what it got wrong — every report makes it count better for everyone.</span><a class="bb-cta" href="https://discord.gg/qTBkN2mbkU" target="_blank" rel="noopener">Join the Discord →</a><button class="bb-x" id="betax" aria-label="Dismiss">✕</button></div></div>
 <nav class="sitenav" id="sitenav"><div class="wrap navin">
   <a class="navbrand" href="#top" aria-label="BDO Loot Tracker — home">
-    <span class="bmark"><img src="assets/logo.webp" alt="" width="32" height="32" style="display:block;width:32px;height:32px;border-radius:8px"></span>
+    <span class="bmark"><img src="assets/logo.webp" alt="BDO Loot Tracker logo" width="32" height="32" style="display:block;width:32px;height:32px;border-radius:8px"></span>
     <span><span class="bt">BDO Loot Tracker <span class="betapill">BETA</span></span><br><span class="bs">GRIND &amp; LIFESKILL SESSIONS</span></span>
   </a>
   <span class="navlinks">
@@ -618,7 +621,7 @@ body.inapp .betabar{display:none}
 
 <header id="top"><div class="wrap herowrap">
   <div>
-    <span class="hkick"><span class="lv"></span>For Black Desert Online · Windows</span>
+    <span class="hkick"><span class="lv"></span>Black Desert Online loot tracker · Windows · free</span>
     <h1 class="hh">Stop guessing.<br>Know your <span class="money">silver/hr</span>.</h1>
     <p class="hlede">BDO Loot Tracker <b>watches your drop log while you play</b>, prices every item at live market value, and turns each grind into post-tax numbers — silver per hour, personal bests, and a Loot Card worth posting.</p>
     <div class="hcta">
@@ -636,6 +639,7 @@ body.inapp .betabar{display:none}
     <div class="herovid">
       <video autoplay muted loop playsinline preload="metadata" poster="assets/hero-grind-poster.jpg" aria-label="The live tracker overlay sitting over a Hexe Sanctuary grind"><source src="assets/hero-grind.mp4" type="video/mp4"></video>
       <div class="hvcap"><span class="lv"></span>real session · Hexe Sanctuary · the panel is the tracker, everything else is the game</div>
+      <p class="sr-only">Video: a Black Desert Online grind session at Hexe Sanctuary with the BDO Loot Tracker overlay in the corner showing live silver per hour, post-tax total, drop count, a pace bar against the player's own average, and a running list of drops with their market value.</p>
     </div>
   </div>
 </div>
@@ -861,7 +865,7 @@ body.inapp .betabar{display:none}
 
 <footer class="foot"><div class="wrap">
   <div class="footin">
-    <a class="navbrand" href="#top"><span class="bmark" style="width:28px;height:28px"><img src="assets/logo.webp" alt="" width="28" height="28" style="display:block;width:28px;height:28px;border-radius:7px"></span>
+    <a class="navbrand" href="#top"><span class="bmark" style="width:28px;height:28px"><img src="assets/logo.webp" alt="BDO Loot Tracker logo" width="28" height="28" style="display:block;width:28px;height:28px;border-radius:7px"></span>
       <span><span class="bt">BDO Loot Tracker</span><br><span class="bs">KNOW YOUR SILVER/HR</span></span></a>
     <span class="footlinks">
       <a href="https://discord.gg/qTBkN2mbkU" target="_blank" rel="noopener">Discord</a>
@@ -876,7 +880,7 @@ body.inapp .betabar{display:none}
 <div id="appwrap" hidden>
 <div class="app">
   <header class="topbar">
-    <div class="logo"><img src="assets/logo.webp" alt="" width="30" height="30" style="display:block;width:30px;height:30px;border-radius:8px"></div>
+    <div class="logo"><img src="assets/logo.webp" alt="BDO Loot Tracker logo" width="30" height="30" style="display:block;width:30px;height:30px;border-radius:8px"></div>
     <div class="brand">BDO Loot Tracker</div>
     <div class="webchip">WEB</div>
     <div class="sp"></div>
@@ -1509,7 +1513,7 @@ var FEAT={
 function pageFeature(mk){
   var m=MODE[mk], f=FEAT[mk];
   return '<div class="feat">'+
-    '<div class="feathero"><div class="eyebrow">'+f.eye+' · desktop app</div><h1>'+f.h+'</h1><p class="lede">'+f.lede+'</p>'+
+    '<div class="feathero"><div class="eyebrow">'+f.eye+' · desktop app</div><h2 class="fh1">'+f.h+'</h2><p class="lede">'+f.lede+'</p>'+
     '<div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap"><button class="btn-primary sm">⬇ Download for Windows</button>'+
     '<button class="btn" data-go="activity" data-mode="'+mk+'">← Back to the '+m.name+' page</button></div></div>'+
 
