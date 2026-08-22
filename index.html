@@ -570,6 +570,17 @@ h1.hh .money{background:linear-gradient(100deg,var(--silver) 15%,var(--silver-2)
 .dlstep .dn b{color:var(--txt-hi)}
 .dls{grid-column:1/-1;font-size:12px;color:var(--txt-dim);line-height:1.6}
 .dls a{color:var(--blue)}
+.betabar{background:linear-gradient(90deg,rgba(79,143,255,.14),rgba(123,92,255,.14));border-bottom:1px solid rgba(79,143,255,.28)}
+.betain{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:12.5px;color:var(--txt)}
+.bb-pill{flex:none;font:800 10px var(--mono);letter-spacing:.12em;color:#fff;background:linear-gradient(135deg,#5D97FF,#7B5CFF);border-radius:6px;padding:4px 8px}
+.bb-t{flex:1;min-width:0}
+.bb-cta{flex:none;color:#fff;font-weight:700;text-decoration:none;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:5px 11px}
+.bb-cta:hover{background:rgba(255,255,255,.14)}
+.bb-x{flex:none;background:none;border:0;color:var(--txt-lo);font-size:13px;cursor:pointer;padding:4px 6px}
+.bb-x:hover{color:var(--txt-hi)}
+.betapill{display:inline-block;vertical-align:2px;margin-left:6px;font:800 9px var(--mono);letter-spacing:.12em;color:var(--blue);border:1px solid rgba(79,143,255,.45);border-radius:5px;padding:2px 5px}
+body.inapp .betabar{display:none}
+@media (max-width:620px){.bb-t{display:none}}
 .herovid{position:relative;width:100%;max-width:640px}
 .herovid video{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--line-lit);background:var(--bg-1);box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px rgba(79,143,255,.12)}
 .hvcap{display:flex;align-items:center;gap:8px;margin-top:10px;font:500 11.5px var(--mono);color:var(--txt-dim);letter-spacing:.02em}
@@ -588,10 +599,11 @@ h1.hh .money{background:linear-gradient(100deg,var(--silver) 15%,var(--silver-2)
 
 
 <div id="site">
+<div class="betabar" id="betabar"><div class="wrap betain"><span class="bb-pill">OPEN BETA</span><span class="bb-t">We're looking for testers. Grind with it, tell us what it got wrong — every report makes it count better for everyone.</span><a class="bb-cta" href="https://discord.gg/qTBkN2mbkU" target="_blank" rel="noopener">Join the Discord →</a><button class="bb-x" id="betax" aria-label="Dismiss">✕</button></div></div>
 <nav class="sitenav" id="sitenav"><div class="wrap navin">
   <a class="navbrand" href="#top" aria-label="BDO Loot Tracker — home">
     <span class="bmark">◈</span>
-    <span><span class="bt">BDO Loot Tracker</span><br><span class="bs">GRIND &amp; LIFESKILL SESSIONS</span></span>
+    <span><span class="bt">BDO Loot Tracker <span class="betapill">BETA</span></span><br><span class="bs">GRIND &amp; LIFESKILL SESSIONS</span></span>
   </a>
   <span class="navlinks">
     <a href="#how">How it works</a>
@@ -599,6 +611,7 @@ h1.hh .money{background:linear-gradient(100deg,var(--silver) 15%,var(--silver-2)
     <a href="#safety">Safety</a>
     <a href="#" data-view="app">Try the app</a>
     <a href="https://github.com/goldstargamingtv-droid/bdo-tracker-releases/releases">Releases</a>
+    <a href="https://discord.gg/qTBkN2mbkU" target="_blank" rel="noopener">Discord</a>
     <a class="cta" href="#download">Download</a>
   </span>
 </div></nav>
@@ -612,7 +625,7 @@ h1.hh .money{background:linear-gradient(100deg,var(--silver) 15%,var(--silver-2)
       <a class="bigbtn pri" href="https://github.com/goldstargamingtv-droid/bdo-tracker-releases/releases/latest/download/BDOLootTracker-win-Setup.exe">⬇ Download for Windows</a>
     </div>
     <a class="hlink" href="#" data-view="app">or try the demo in your browser →</a>
-    <div class="undercta">v0.1.66 · free · auto-updates itself · ~195 MB</div>
+    <div class="undercta">v0.1.66 beta · free · auto-updates itself · ~195 MB</div>
     <div class="chips3">
       <span class="chip3"><span class="tk">✓</span>Screen pixels only — never touches the game</span>
       <span class="chip3"><span class="tk">✓</span>CPU-only — your GPU stays on BDO</span>
@@ -782,7 +795,7 @@ h1.hh .money{background:linear-gradient(100deg,var(--silver) 15%,var(--silver-2)
   <div>
     <div class="kick" style="color:var(--green)">No download required</div>
     <h2>See the whole app before you install a thing</h2>
-    <p class="lede" style="font-size:14.5px">A full demo account runs right here in your browser — Home, Top Spots, History, Materials and the Enhancement ledger, loaded with a made-up but realistic account so you can see what the app looks like once it has been used. Live tracking is the one part that needs your screen, so it stays in the app.</p>
+    <p class="lede" style="font-size:14.5px">A full demo account runs right here in your browser — Home, Top Spots, History, Materials and the Enhancement ledger, loaded with a made-up but realistic account so you can see what the app looks like once it has been used. It's an open beta — the testers in Discord are the reason it counts what it counts. Live tracking is the one part that needs your screen, so it stays in the app.</p>
     <div class="hcta"><a class="bigbtn pri" href="#" data-view="app">Open the demo →</a>
     <a class="bigbtn ghost" href="#download">Skip to download</a></div>
   </div>
@@ -807,7 +820,7 @@ h1.hh .money{background:linear-gradient(100deg,var(--silver) 15%,var(--silver-2)
 </div></div></section>
 
 <section class="sect" id="download"><div class="wrap"><div class="dlcard rv">
-  <span class="verpill"><span class="lv"></span>latest release &nbsp;v0.1.66 · August 21, 2026</span>
+  <span class="verpill"><span class="lv"></span>latest release &nbsp;v0.1.66 beta · August 21, 2026</span>
   <h2>Grab it and go grind</h2>
   <p class="lede" style="margin:0 auto">Free, installs per-user in seconds, and keeps itself up to date from GitHub Releases.</p>
   <div class="hcta" style="justify-content:center">
@@ -820,6 +833,7 @@ h1.hh .money{background:linear-gradient(100deg,var(--silver) 15%,var(--silver-2)
     <div class="dlstep"><img src="assets/smartscreen-edge-1.png" alt="Edge download bubble: the file isn't commonly downloaded — the ⋯ menu shows Keep"><div class="dn"><span>1</span><div>Edge says “isn't commonly downloaded” → click <b>⋯ → Keep</b></div></div></div>
     <div class="dlstep"><img src="assets/smartscreen-edge-2.png" alt="Edge panel: Make sure you trust this file — the Delete dropdown reveals Keep anyway"><div class="dn"><span>2</span><div>Then “Make sure you trust…” → open the <b>Delete ▾</b> dropdown → <b>Keep anyway</b></div></div></div>
     <div class="dlstep"><img src="assets/smartscreen-run.png" alt="Windows Open File security warning: publisher could not be verified — Run"><div class="dn"><span>3</span><div>Open it — “publisher could not be verified” → <b>Run</b></div></div></div>
+    <div class="dls"><b style="color:var(--txt)">Stuck, or it counted something wrong?</b> Ask in the <a href="https://discord.gg/qTBkN2mbkU" target="_blank" rel="noopener">Discord</a> — and use <b>Export Diagnostics</b> in the app's Account tab; that file is what lets us fix a misread for everyone.</div>
     <div class="dls">Chrome and Firefox skip steps 1–2. Some PCs show a blue “Windows protected your PC” screen instead of step 3 — click <b>More info → Run anyway</b>. Every version and its release notes are on <a href="https://github.com/goldstargamingtv-droid/bdo-tracker-releases/releases">GitHub Releases</a>.</div>
   </div>
   <div class="reqrow"><span>◆ Windows 10 / 11 (64-bit)</span><span>◆ 1920×1080, borderless windowed</span><span>◆ in-game drop log visible</span></div>
@@ -838,8 +852,10 @@ h1.hh .money{background:linear-gradient(100deg,var(--silver) 15%,var(--silver-2)
       <p>Live grinding and hunting sessions (drop log + Get-All loot box reading), and cooking and alchemy sessions with full net-profit accounting. Alongside the live tracking there's a Materials planner for what you can craft from your storage, and a manual Enhancement ledger for what the RNG has cost you.</p></details>
     <details><summary>How accurate is it?<span class="pm" aria-hidden="true"></span></summary>
       <p>It is checked against the game, not against itself: recognition is tuned on real sessions where the before/after inventory was counted by hand, and production runs are matched item by item against that count — a 193-bottle alchemy brew came out exact on every line. It is also honest about uncertainty: a read it is not sure of is flagged in honey-yellow instead of hidden, and any drop worth over 1M silver needs a confident read or a second sighting before it enters your totals, so one blurry frame can never invent a jackpot. Unpriced and unrecognised drops are counted and shown, never silently dropped.</p></details>
+    <details><summary>Something didn't count right — where do I report it?<span class="pm" aria-hidden="true"></span></summary>
+      <p>The <a href="https://discord.gg/qTBkN2mbkU" target="_blank" rel="noopener">Discord</a>. Say which spot and roughly when, and attach the file from <b>Account → Export Diagnostics</b> — it packs the frames around the miss into a ~10 MB zip with nothing else from your PC in it. That's usually enough to fix the read for that spot in the next release, for everyone.</p></details>
     <details><summary>Is it free?<span class="pm" aria-hidden="true"></span></summary>
-      <p>Yes — free to download and use. It's a passion project built by a grinder who wanted real numbers.</p></details>
+      <p>Yes — free during the beta, and it stays free. It's a passion project built by a grinder who wanted real numbers; the only thing we ask is that you tell us when it's wrong.</p></details>
   </div>
 </div></section>
 
@@ -848,6 +864,7 @@ h1.hh .money{background:linear-gradient(100deg,var(--silver) 15%,var(--silver-2)
     <a class="navbrand" href="#top"><span class="bmark" style="width:28px;height:28px;font-size:13px">◈</span>
       <span><span class="bt">BDO Loot Tracker</span><br><span class="bs">KNOW YOUR SILVER/HR</span></span></a>
     <span class="footlinks">
+      <a href="https://discord.gg/qTBkN2mbkU" target="_blank" rel="noopener">Discord</a>
       <a href="https://github.com/goldstargamingtv-droid/bdo-tracker-releases/releases">Releases</a>
       <a href="#download">Download</a><a href="#safety">Safety</a><a href="#" data-view="app">Try the app</a>
     </span>
@@ -2227,6 +2244,11 @@ document.querySelectorAll('.stat4 .num[data-count]').forEach(function(el){
     o.observe(el);
   } else run();
 });
+
+/* beta banner: dismiss once, stay dismissed */
+(function(){ var b=document.getElementById('betabar'), x=document.getElementById('betax');
+  try{ if(localStorage.getItem('betabar')==='x') b.remove(); }catch(e){}
+  if(x) x.addEventListener('click', function(){ b.remove(); try{ localStorage.setItem('betabar','x'); }catch(e){} }); })();
 
 /* feature clips: play only while on screen */
 document.querySelectorAll('.fvid video').forEach(function(v){
