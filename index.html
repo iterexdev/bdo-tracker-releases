@@ -48,7 +48,7 @@ input,select{font:inherit}
 /* ---------- shell ---------- */
 .app{height:calc(100vh - 46px);min-height:780px;display:flex;flex-direction:column;background:radial-gradient(130% 90% at 50% -10%,#0F141E 0%,var(--bg-0) 62%)}
 .topbar{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:0 18px;height:50px;background:var(--bg-1);border-bottom:1px solid var(--line)}
-.logo{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:linear-gradient(160deg,#2A3446,#151A24);border:1px solid var(--line-lit);color:var(--silver-2);font-size:13px}
+.logo{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;overflow:hidden;flex:none}
 .brand{font-weight:700;font-size:13.5px;color:var(--txt-hi);letter-spacing:-.01em;white-space:nowrap}
 .webchip{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:1.2px;color:var(--blue);border:1px solid rgba(79,143,255,.4);background:rgba(79,143,255,.10);padding:2px 6px;border-radius:4px}
 .topbar .sp{flex:1}
@@ -390,7 +390,7 @@ svg.chart{display:block;width:100%}
 .sitenav.scrolled{border-bottom-color:var(--line);background:rgba(8,10,15,.94)}
 .navin{display:flex;align-items:center;gap:22px;height:62px}
 .navbrand{display:flex;align-items:center;gap:11px;text-decoration:none}
-.navbrand .bmark{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(160deg,#2A3446,#151A24);border:1px solid var(--line-lit);color:var(--silver-2);font-size:15px}
+.navbrand .bmark{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;overflow:hidden;flex:none}
 .navbrand .bt{font-size:14px;font-weight:700;color:var(--txt-hi);letter-spacing:-.01em;line-height:1.2}
 .navbrand .bs{font-size:8.5px;font-weight:700;letter-spacing:1.4px;color:var(--txt-dim)}
 .navlinks{display:flex;align-items:center;gap:6px;margin-left:auto}
@@ -602,7 +602,7 @@ body.inapp .betabar{display:none}
 <div class="betabar" id="betabar"><div class="wrap betain"><span class="bb-pill">OPEN BETA</span><span class="bb-t">We're looking for testers. Grind with it, tell us what it got wrong — every report makes it count better for everyone.</span><a class="bb-cta" href="https://discord.gg/qTBkN2mbkU" target="_blank" rel="noopener">Join the Discord →</a><button class="bb-x" id="betax" aria-label="Dismiss">✕</button></div></div>
 <nav class="sitenav" id="sitenav"><div class="wrap navin">
   <a class="navbrand" href="#top" aria-label="BDO Loot Tracker — home">
-    <span class="bmark">◈</span>
+    <span class="bmark"><img src="assets/logo.webp" alt="" width="32" height="32" style="display:block;width:32px;height:32px;border-radius:8px"></span>
     <span><span class="bt">BDO Loot Tracker <span class="betapill">BETA</span></span><br><span class="bs">GRIND &amp; LIFESKILL SESSIONS</span></span>
   </a>
   <span class="navlinks">
@@ -861,7 +861,7 @@ body.inapp .betabar{display:none}
 
 <footer class="foot"><div class="wrap">
   <div class="footin">
-    <a class="navbrand" href="#top"><span class="bmark" style="width:28px;height:28px;font-size:13px">◈</span>
+    <a class="navbrand" href="#top"><span class="bmark" style="width:28px;height:28px"><img src="assets/logo.webp" alt="" width="28" height="28" style="display:block;width:28px;height:28px;border-radius:7px"></span>
       <span><span class="bt">BDO Loot Tracker</span><br><span class="bs">KNOW YOUR SILVER/HR</span></span></a>
     <span class="footlinks">
       <a href="https://discord.gg/qTBkN2mbkU" target="_blank" rel="noopener">Discord</a>
@@ -876,7 +876,7 @@ body.inapp .betabar{display:none}
 <div id="appwrap" hidden>
 <div class="app">
   <header class="topbar">
-    <div class="logo">◈</div>
+    <div class="logo"><img src="assets/logo.webp" alt="" width="30" height="30" style="display:block;width:30px;height:30px;border-radius:8px"></div>
     <div class="brand">BDO Loot Tracker</div>
     <div class="webchip">WEB</div>
     <div class="sp"></div>
@@ -2096,7 +2096,7 @@ function put(id, html){ var el=document.getElementById(id); if(el) el.innerHTML=
           '<span class="src">×'+grp(x.q)+'</span><span class="tv m" style="min-width:56px;text-align:right">'+shortM(x.v)+'</span></div>';
       }).join('')+'</div>'+
       '<div style="display:flex;align-items:center;gap:9px;padding:11px 18px;border-top:1px solid var(--line);font-size:11px;color:var(--txt-dim)">'+
-      '<span style="color:var(--silver-2)">◈</span><b style="color:var(--txt-lo);font-weight:600">BDO Loot Tracker</b>'+
+      '<img src="assets/logo.webp" alt="" style="width:16px;height:16px;border-radius:4px;vertical-align:-3px;margin-right:5px"><b style="color:var(--txt-lo);font-weight:600">BDO Loot Tracker</b>'+
       '<span style="flex:1"></span><span>know your silver/hr</span></div></div>');
 })();
 
