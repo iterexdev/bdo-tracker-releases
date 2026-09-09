@@ -28,9 +28,9 @@ on:
   # (see the 60-day section in README.md).
   workflow_dispatch:
     inputs:
-      region:
-        description: "arsha region to publish (must match pricing.region in the app)"
-        default: "na"
+      regions:
+        description: 'JSON list of arsha regions to publish (each must be in PRICE_REGIONS in the app)'
+        default: '["na", "eu"]'
         required: false
 
 # Minimal by construction: naming any permission drops every unnamed one to
@@ -52,6 +52,17 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    strategy:
+      # One job per region, in parallel. Each writes its own asset
+      # (price_snapshot_<region>.json.gz) on the shared `prices` tag, so the
+      # jobs never touch the same file; the `prices` release itself already
+      # exists, so the create-if-missing step below is a no-op race-free
+      # check. Keep this list equal to PRICE_REGIONS in bdo_tracker/config.py
+      # (2026-09-09: na, eu) — a region the app offers with no job here falls
+      # to per-item arsha on every install that picks it.
+      fail-fast: false
+      matrix:
+        region: ${{ fromJSON(inputs.regions || '["na", "eu"]') }}
     # The sweep is ~17 category requests plus per-item follow-ups, so a healthy
     # run is minutes. This only stops a hung run from burning the budget.
     timeout-minutes: 30
@@ -65,8 +76,7 @@ jobs:
       # Every install that has not overridden that URL will 404 if the two
       # drift apart. README.md section 1 covers this.
       SNAPSHOT_TAG: prices
-      # Schedule runs supply no inputs, so `inputs.region` is null there.
-      REGION: ${{ inputs.region || 'na' }}
+      REGION: ${{ matrix.region }}
       # Built-in token, scoped to this repo by the permissions block above.
       # No PAT: the asset and the release both live in the repo running this.
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
