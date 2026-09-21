@@ -30,7 +30,7 @@ on:
     inputs:
       regions:
         description: 'JSON list of arsha regions to publish (each must be in PRICE_REGIONS in the app)'
-        default: '["na", "eu", "sea"]'
+        default: '["na", "eu", "sea", "mena", "kr", "ru", "jp", "tw", "sa", "console_na", "console_eu", "console_asia"]'
         required: false
 
 # Minimal by construction: naming any permission drops every unnamed one to
@@ -58,11 +58,12 @@ jobs:
       # jobs never touch the same file; the `prices` release itself already
       # exists, so the create-if-missing step below is a no-op race-free
       # check. Keep this list equal to PRICE_REGIONS in bdo_tracker/config.py
-      # (2026-09-11: na, eu, sea) — a region the app offers with no job here falls
+      # (SEA includes Thailand) — a region the app offers with no job here falls
       # to per-item arsha on every install that picks it.
       fail-fast: false
+      max-parallel: 2
       matrix:
-        region: ${{ fromJSON(inputs.regions || '["na", "eu", "sea"]') }}
+        region: ${{ fromJSON(inputs.regions || '["na", "eu", "sea", "mena", "kr", "ru", "jp", "tw", "sa", "console_na", "console_eu", "console_asia"]') }}
     # The sweep is ~17 category requests plus per-item follow-ups, so a healthy
     # run is minutes. This only stops a hung run from burning the budget.
     timeout-minutes: 30
@@ -154,6 +155,10 @@ jobs:
           # CONTRACT SURFACE. If the builder's flags differ, this is the only
           # step to edit — see README.md section 2.
           args=(--region "$REGION" --out "$OUT")
+          # MENA uses Pearl Abyss directly; keep the per-item sweep modest.
+          if [ "$REGION" = "mena" ]; then
+            args+=(--workers 3)
+          fi
           if [ -n "${PREV:-}" ]; then
             args+=(--previous "$PREV")
           fi

@@ -541,7 +541,10 @@ def main() -> int:
     )
 
     # ── pass 1 ──
-    rows, cat_failures, counts = sweep_categories(region, MAIN_CATEGORIES)
+    # MENA's direct category response uses a different wire format. Walk the
+    # known item ids through the same per-item reader the app uses instead.
+    categories = () if region == "mena" else MAIN_CATEGORIES
+    rows, cat_failures, counts = sweep_categories(region, categories)
     observed: dict[int, Observation] = {}
     tail: list[int] = []
     for item_id, (row, seen_at) in rows.items():
@@ -550,9 +553,9 @@ def main() -> int:
             tail.append(item_id)
         else:
             observed[item_id] = obs
-    ok_cats = len(MAIN_CATEGORIES) - len(cat_failures)
+    ok_cats = len(categories) - len(cat_failures)
     print(
-        f"pass 1    {ok_cats}/{len(MAIN_CATEGORIES)} categories, {len(rows)} items seen"
+        f"pass 1    {ok_cats}/{len(categories)} categories, {len(rows)} items seen"
         f" -> {len(observed)} decided, {len(tail)} zero-stock"
     )
     for cat, err in cat_failures:
@@ -621,13 +624,18 @@ def main() -> int:
         )
         return 2
 
+    if region == "mena" and previous is None and report.no_data:
+        print("FATAL: first MENA snapshot must cover every target id", file=sys.stderr)
+        return 2
+
     # ── build + gate ──
     generated_at = datetime.now(timezone.utc)
     snap = snapshot.build(
         region,
         entries,
         generated_at=generated_at,
-        source=SOURCE_LABEL.format(region=region),
+        source=("Pearl Abyss MENA /Trademarket/GetWorldMarketSubList"
+                if region == "mena" else SOURCE_LABEL.format(region=region)),
     )
     try:
         snapshot.check(

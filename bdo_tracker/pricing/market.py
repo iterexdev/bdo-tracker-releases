@@ -20,6 +20,7 @@ from typing import Callable, Iterable
 from bdo_tracker.config import PricingConfig
 
 ARSHA_URL = "https://api.arsha.io/v2/{region}/item?id={item_id}&lang=en"
+MENA_URL = "https://tr-trade.blackdesert.pearlabyss.com/Trademarket/GetWorldMarketSubList"
 _RETRIES = 4
 # Concurrent fetches during prefetch. Modest on purpose: arsha is a free
 # community API fronted by a WAF that already 103s under load — hammering
@@ -57,6 +58,38 @@ class Price:
     taxed: bool  # market sales pay tax; vendor sales don't
 
 
+def _mena_item(client, item_id: int, sid: int = 0) -> dict:
+    """Read-only Pearl Abyss endpoint; measured 2026-09-21 while Arsha MENA
+    failed. Normalize its item/level rows to the existing pricing fields.
+    A malformed/error response is a failed fetch, never a cached refusal.
+    """
+    resp = client.post(MENA_URL, json={"keyType": 0, "mainKey": item_id},
+                       headers={"User-Agent": "BlackDesert"})
+    resp.raise_for_status()
+    data = resp.json()
+    if not isinstance(data, dict) or data.get("resultCode") != 0:
+        raise ValueError("MENA market returned an error")
+    raw = data.get("resultMsg")
+    if raw == "0":  # measured response for an item absent from this market
+        return {}
+    if not isinstance(raw, str) or not raw:
+        raise ValueError("MENA market returned no item data")
+    selected = None
+    for row in raw.rstrip("|").split("|"):
+        fields = row.split("-")
+        if len(fields) != 10:
+            raise ValueError("MENA market returned a malformed item row")
+        ident, low, high, base, stock, trades, floor, ceiling, last, stamp = map(int, fields)
+        if ident != item_id or low > high:
+            raise ValueError("MENA market returned a different item or invalid level range")
+        if low <= sid <= high:
+            if selected is not None:
+                raise ValueError("MENA market returned overlapping level ranges")
+            selected = {"id": ident, "basePrice": base, "currentStock": stock,
+                        "totalTrades": trades, "lastSoldPrice": last}
+    return selected or {}
+
+
 def _default_fetcher(region: str, item_id: int) -> int:
     """arsha.io quirks (verified 2026-07-03): transient per-request 500s
     with code 103 (upstream WAF) -> retry with backoff; not-marketable
@@ -68,11 +101,14 @@ def _default_fetcher(region: str, item_id: int) -> int:
     last_err: Exception | None = None
     for attempt in range(_RETRIES):
         try:
-            resp = _http_client().get(ARSHA_URL.format(region=region, item_id=item_id))
-            data = resp.json()
-            if isinstance(data, dict) and data.get("code") == 103:
-                raise ConnectionError("arsha transient 103")
-            resp.raise_for_status()
+            if region == "mena":
+                data = _mena_item(_http_client(), item_id)
+            else:
+                resp = _http_client().get(ARSHA_URL.format(region=region, item_id=item_id))
+                data = resp.json()
+                if isinstance(data, dict) and data.get("code") == 103:
+                    raise ConnectionError("arsha transient 103")
+                resp.raise_for_status()
             if isinstance(data, list):
                 data = data[0]
             base = int(data.get("basePrice", 0))
